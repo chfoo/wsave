@@ -19,6 +19,9 @@ class CircularBuffer {
             length = data.length - position;
         }
 
+        Debug.assert(position >= 0, position);
+        Debug.assert(length >= 0, length);
+
         if (length + logicalLength > buffer.length) {
             resize(length + logicalLength);
         }
