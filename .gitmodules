@@ -1,0 +1,3 @@
+[submodule "lib/encoding"]
+	path = lib/encoding
+	url = git@github.com:whatwg/encoding.git

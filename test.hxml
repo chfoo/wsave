@@ -3,4 +3,7 @@
 -js test.js
 -lib exception
 -lib utest
+-lib unifill
+-resource lib/encoding/indexes.json@encoding/indexes.json
+-resource lib/encoding/encodings.json@encoding/encodings.json
 -main wsave.TestAll
