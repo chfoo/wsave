@@ -266,20 +266,4 @@ class StreamReader implements IInputStream {
 
         return separateAtSeparator(data, "\r".code, position, keepEnd);
     }
-
-    // function separateAtCRNL(data:Bytes, position:Int, keepEnd:Bool):Null<Bytes> {
-    //     var separatorIndex = data.char2IndexOf("\r".code, "\n".code);
-
-    //     if (separatorIndex >= 0) {
-    //         var targetData = pendingDataBuffer.shiftBytes(position + separatorIndex + 2);
-
-    //         if (keepEnd) {
-    //             return targetData;
-    //         } else {
-    //             return targetData.sub(0, targetData.length - 2);
-    //         }
-    //     }
-
-    //     return null;
-    // }
 }

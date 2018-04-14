@@ -84,4 +84,20 @@ class TestNameValueRecord {
         Assert.equals("", record.get("key-empty-value"));
         Assert.equals("", record.get("key-missing-colon"));
     }
+
+    public function testWithTrailingNewline() {
+        var record = NameValueRecord.parseString(
+            "something: hello world\r\n"
+        );
+
+        Assert.equals(1, record.count());
+    }
+
+    public function testWithoutTrailingNewline() {
+        var record = NameValueRecord.parseString(
+            "something: hello world"
+        );
+
+        Assert.equals(1, record.count());
+    }
 }

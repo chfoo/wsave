@@ -37,6 +37,10 @@ class NameValueRecordParser {
                 continue;
             }
 
+            if (line.trim().length == 0) {
+                continue;
+            }
+
             if (isInFold) {
                 isInFold = false;
                 popBufferedValue();
