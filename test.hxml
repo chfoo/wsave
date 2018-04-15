@@ -4,6 +4,7 @@
 -lib exception
 -lib utest
 -lib unifill
--resource lib/encoding/indexes.json@encoding/indexes.json
 -resource lib/encoding/encodings.json@encoding/encodings.json
+-resource lib/encoding/indexes.json@encoding/indexes.json
+-resource test/samples/UTF-8-test.txt@test/samples/UTF-8-test.txt
 -main wsave.TestAll

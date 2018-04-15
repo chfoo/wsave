@@ -22,7 +22,7 @@ class SingleByteDecoder implements Handler {
             var codePoint = table.get(pointer);
 
             if (codePoint == null) {
-                return Result.Error(CodecTools.NO_CODE_POINT);
+                return Result.Error(CodecTools.INT_NULL);
             }
 
             return Result.Token(codePoint);

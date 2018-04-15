@@ -1,6 +1,7 @@
 package wsave.text.codec;
 
 import haxe.io.Bytes;
+import unifill.CodePoint;
 import wsave.text.TextExceptions;
 
 
@@ -58,10 +59,10 @@ class Decoder {
             case Result.Continue | Result.Finished:
                 return result;
             case Result.Token(codePoint):
-                output.addChar(codePoint);
+                output.add(CodePoint.fromInt(codePoint));
             case Result.Tokens(codePoints):
                 for (codePoint in codePoints) {
-                    output.addChar(codePoint);
+                    output.add(CodePoint.fromInt(codePoint));
                 }
             case Result.Error(codePoint):
                 var result = processError(result);
