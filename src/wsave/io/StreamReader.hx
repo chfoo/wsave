@@ -3,6 +3,7 @@ package wsave.io;
 import haxe.io.Bytes;
 import haxe.io.Eof;
 import haxe.io.Input;
+import wsave.ds.BytesCircularBuffer;
 import wsave.io.IOExceptions;
 
 using wsave.io.BytesTools;
@@ -13,11 +14,11 @@ class StreamReader implements IInputStream {
     public var maxBufferSize = 1048576;
 
     var input:Input;
-    var pendingDataBuffer:CircularBuffer;
+    var pendingDataBuffer:BytesCircularBuffer;
 
     public function new(input:Input) {
         this.input = input;
-        pendingDataBuffer = new CircularBuffer();
+        pendingDataBuffer = new BytesCircularBuffer();
     }
 
     public function read(amount:Int = -1, exact:Bool = false):Bytes {
@@ -56,7 +57,7 @@ class StreamReader implements IInputStream {
         Debug.assert(amount >= 0, amount);
 
         var buffer = Bytes.alloc(amount);
-        var bufferData = pendingDataBuffer.shiftBytes(amount);
+        var bufferData = pendingDataBuffer.shiftRange(amount);
 
         buffer.blit(0, bufferData, 0, bufferData.length);
 
@@ -82,21 +83,21 @@ class StreamReader implements IInputStream {
                 }
             }
 
-            pendingDataBuffer.pushBytes(data);
+            pendingDataBuffer.pushRange(data);
 
             if (maxBufferSize > 0 && pendingDataBuffer.logicalLength > maxBufferSize) {
                 throw new BufferFull();
             }
         }
 
-        return pendingDataBuffer.shiftBytes();
+        return pendingDataBuffer.shiftRange();
     }
 
     function readExact(amount:Int):Bytes {
         Debug.assert(amount >= 0);
 
         var buffer = Bytes.alloc(amount);
-        var bufferData = pendingDataBuffer.shiftBytes(amount);
+        var bufferData = pendingDataBuffer.shiftRange(amount);
         buffer.blit(0, bufferData, 0, bufferData.length);
         var index = bufferData.length;
 
@@ -111,15 +112,15 @@ class StreamReader implements IInputStream {
                 if (index == 0) {
                     throw new EndOfFile();
                 } else {
-                    throw new IncompleteRead(pendingDataBuffer.shiftBytes());
+                    throw new IncompleteRead(pendingDataBuffer.shiftRange());
                 }
             }
 
-            pendingDataBuffer.pushBytes(data);
+            pendingDataBuffer.pushRange(data);
             index += data.length;
         }
 
-        return pendingDataBuffer.shiftBytes();
+        return pendingDataBuffer.shiftRange();
     }
 
     function readBestEffort(amount:Int):Bytes {
@@ -207,13 +208,13 @@ class StreamReader implements IInputStream {
             data = readRaw(currentChunkSize);
         } catch (exception:EndOfFile) {
             if (pendingDataBuffer.logicalLength > 0) {
-                throw new IncompleteRead(pendingDataBuffer.shiftBytes());
+                throw new IncompleteRead(pendingDataBuffer.shiftRange());
             } else {
                 throw exception;
             }
         }
 
-        pendingDataBuffer.pushBytes(data);
+        pendingDataBuffer.pushRange(data);
         return data;
     }
 
@@ -221,7 +222,7 @@ class StreamReader implements IInputStream {
         var separatorIndex = data.charIndexOf(separator);
 
         if (separatorIndex >= 0) {
-            var targetData = pendingDataBuffer.shiftBytes(position + separatorIndex + 1);
+            var targetData = pendingDataBuffer.shiftRange(position + separatorIndex + 1);
 
             if (keepEnd) {
                 return targetData;
@@ -246,7 +247,7 @@ class StreamReader implements IInputStream {
             return data;
         }
 
-        pendingDataBuffer.pushBytes(extraData);
+        pendingDataBuffer.pushRange(extraData);
 
         var newData = Bytes.alloc(data.length + 1);
         newData.blit(0, data, 0, data.length);
