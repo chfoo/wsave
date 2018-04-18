@@ -4,6 +4,8 @@ import haxe.io.Bytes;
 import unifill.CodePoint;
 import wsave.text.TextExceptions;
 
+using unifill.Unifill;
+
 
 class Decoder {
     var errorMode:ErrorMode;
@@ -20,7 +22,7 @@ class Decoder {
         output = new StringBuf();
     }
 
-    public function decode(data:Bytes):String {
+    public function decode(data:Bytes, incremental:Bool = false):String {
         var dataIndex = 0;
 
         while (true) {
@@ -31,8 +33,10 @@ class Decoder {
             } else if (dataIndex < data.length) {
                 byte = data.get(dataIndex);
                 dataIndex += 1;
-            } else {
+            } else if (!incremental) {
                 byte = Stream.END_OF_STREAM;
+            } else {
+                break;
             }
 
             var result = process(byte);
@@ -52,6 +56,10 @@ class Decoder {
         return text;
     }
 
+    public function flush():String {
+        return decode(Bytes.alloc(0));
+    }
+
     function process(byte:Int):Result {
         var result = handler.process(input, byte);
 
@@ -59,10 +67,10 @@ class Decoder {
             case Result.Continue | Result.Finished:
                 return result;
             case Result.Token(codePoint):
-                output.add(CodePoint.fromInt(codePoint));
+                output.uAddChar(CodePoint.fromInt(codePoint));
             case Result.Tokens(codePoints):
                 for (codePoint in codePoints) {
-                    output.add(CodePoint.fromInt(codePoint));
+                    output.uAddChar(CodePoint.fromInt(codePoint));
                 }
             case Result.Error(codePoint):
                 var result = processError(result);

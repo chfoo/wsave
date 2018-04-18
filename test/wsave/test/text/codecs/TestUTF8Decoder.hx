@@ -41,13 +41,15 @@ class TestUTF8Decoder {
                 break;
             }
 
-            outputBuffer.add(decoder.decode(buffer.sub(0, amountRead)));
+            outputBuffer.add(decoder.decode(buffer.sub(0, amountRead), true));
         }
 
+        outputBuffer.add(decoder.flush());
         var output = outputBuffer.toString();
 
         trace(output);
 
         Assert.isTrue(output.indexOf("THE END    ") >= 0);
+        Assert.equals("|\n", output.substr(output.length - 2, 2));
     }
 }
