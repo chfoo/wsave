@@ -30,6 +30,17 @@ class BaseCircularBuffer<T,B> {
         throw new NotImplementedException();
     }
 
+    public function push(item:T) {
+        if (1 + logicalLength > getLength(buffer)) {
+            resize(1 + logicalLength);
+        }
+
+        var bufferIndex = (logicalStartIndex + logicalLength ) % getLength(buffer);
+        dataSet(buffer, bufferIndex, item);
+
+        logicalLength += 1;
+    }
+
     public function pushRange(data:B, position:Int = 0, ?length:Int) {
         if (length == null) {
             length = getLength(data) - position;
@@ -51,6 +62,25 @@ class BaseCircularBuffer<T,B> {
         logicalLength += length;
     }
 
+    public function shift():T {
+        if (logicalLength <= 0) {
+            throw new BoundsException("Empty buffer.");
+        }
+
+        var bufferIndex = logicalStartIndex % getLength(buffer);
+        var item = dataGet(buffer, bufferIndex);
+
+        logicalStartIndex += 1;
+        logicalLength -= 1;
+
+        logicalStartIndex %= getLength(buffer);
+
+        Debug.assert(logicalStartIndex >= 0, logicalStartIndex);
+        Debug.assert(logicalLength >= 0, logicalLength);
+
+        return item;
+    }
+
     public function shiftRange(?amount:Int):B {
         var data = copyCurrent(amount);
         var length = getLength(data);
@@ -66,7 +96,16 @@ class BaseCircularBuffer<T,B> {
         return data;
     }
 
-     public function peek(?amount:Int):B {
+    public function peek():T {
+        if (logicalLength <= 0) {
+            throw new BoundsException("Empty buffer.");
+        }
+
+        var bufferIndex = logicalStartIndex % getLength(buffer);
+        return dataGet(buffer, bufferIndex);
+    }
+
+    public function peekRange(?amount:Int):B {
         return copyCurrent(amount);
     }
 

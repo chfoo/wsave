@@ -21,6 +21,10 @@ class TestCircularBuffer extends BaseTestCircularBuffer<Int,Vector<Int>> {
         return data;
     }
 
+    override function newItem(value:Int):Int {
+        return value;
+    }
+
     override function getDataLength(data:Vector<Int>):Int {
         return data.length;
     }
@@ -51,5 +55,9 @@ class TestCircularBuffer extends BaseTestCircularBuffer<Int,Vector<Int>> {
 
     override public function testClear() {
         super.testClear();
+    }
+
+    override public function testPeek() {
+        super.testPeek();
     }
 }

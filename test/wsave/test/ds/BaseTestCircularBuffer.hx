@@ -17,6 +17,10 @@ class BaseTestCircularBuffer<T,B> {
         throw new NotImplementedException();
     }
 
+    function newItem(value:Int):T {
+        throw new NotImplementedException();
+    }
+
     function getDataLength(data:B):Int {
         throw new NotImplementedException();
     }
@@ -46,6 +50,14 @@ class BaseTestCircularBuffer<T,B> {
 
             shiftedData = buffer.shiftRange();
             assertDataEqual(shiftedData, data3);
+        }
+
+        for (dummy in 0...50) {
+            buffer.push(newItem(123));
+
+            var shiftedItem = buffer.shift();
+
+            Assert.equals(newItem(123), shiftedItem);
         }
     }
 
@@ -84,6 +96,10 @@ class BaseTestCircularBuffer<T,B> {
         var buffer = newCircularBuffer(6);
         var shiftedData = buffer.shiftRange();
         Assert.equals(0, getDataLength(shiftedData));
+
+        Assert.raises(function () {
+            buffer.shift();
+        }, BoundsException);
     }
 
     @Ignored
@@ -100,5 +116,29 @@ class BaseTestCircularBuffer<T,B> {
 
         shiftedData = buffer.shiftRange();
         Assert.equals(0, getDataLength(shiftedData));
+    }
+
+    @Ignored
+    function testPeek() {
+        var data1 = newData("hello");
+        var buffer = newCircularBuffer(6);
+        buffer.pushRange(data1);
+
+        var peekedData = buffer.peekRange(2);
+        assertDataEqual(peekedData, newData("he"));
+
+        Assert.equals("h".code, buffer.peek());
+    }
+
+    @Ignored
+    function testPeekEmpty() {
+        var buffer = newCircularBuffer(6);
+
+        var peekedData = buffer.peekRange(2);
+        Assert.equals(0, getDataLength(peekedData));
+
+        Assert.raises(function () {
+            buffer.peek();
+        }, BoundsException);
     }
 }

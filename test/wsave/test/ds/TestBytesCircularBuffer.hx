@@ -21,6 +21,10 @@ class TestBytesCircularBuffer extends BaseTestCircularBuffer<Int,Bytes> {
         return data;
     }
 
+    override function newItem(value:Int):Int {
+        return value;
+    }
+
     override function getDataLength(data:Bytes):Int {
         return data.length;
     }
@@ -31,5 +35,33 @@ class TestBytesCircularBuffer extends BaseTestCircularBuffer<Int,Bytes> {
         for (index in 0...data1.length) {
             Assert.equals(data1.get(index), data2.get(index));
         }
+    }
+
+    override public function testPushShift() {
+        super.testPushShift();
+    }
+
+    override public function testResize() {
+        super.testResize();
+    }
+
+    override public function testShiftBounds() {
+        super.testShiftBounds();
+    }
+
+    override public function testShiftEmpty() {
+        super.testShiftEmpty();
+    }
+
+    override public function testClear() {
+        super.testClear();
+    }
+
+    override public function testPeek() {
+        super.testPeek();
+    }
+
+    override public function testPeekEmpty() {
+        super.testPeekEmpty();
     }
 }

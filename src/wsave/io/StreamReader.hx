@@ -138,7 +138,7 @@ class StreamReader implements IInputStream {
                 data = readChunkIntoBuffer();
             } else {
                 checkedBuffer = true;
-                data = pendingDataBuffer.peek();
+                data = pendingDataBuffer.peekRange();
             }
 
             if (isDataEndOnCarriageReturn(data)) {
@@ -164,7 +164,7 @@ class StreamReader implements IInputStream {
             if (checkedBuffer) {
                 data = readChunkIntoBuffer();
             } else {
-                data = pendingDataBuffer.peek();
+                data = pendingDataBuffer.peekRange();
                 checkedBuffer = true;
             }
 
