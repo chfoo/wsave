@@ -6,9 +6,13 @@ import haxe.Exception;
 
 class Exception extends haxe.Exception {
     @:noUsing
-	static public function wrap (e:Dynamic, exceptionStack:Array<StackItem> = null):haxe.Exception {
-		return haxe.Exception.wrap(e, exceptionStack);
-	}
+    static public function wrap (e:Dynamic, exceptionStack:Array<StackItem> = null):haxe.Exception {
+        return haxe.Exception.wrap(e, exceptionStack);
+    }
+
+    override function toString():String {
+        return '[${Type.getClassName(Type.getClass(this))} ${message}]';
+    }
 }
 
 
