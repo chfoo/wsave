@@ -127,34 +127,6 @@ class StreamReader implements IInputStream {
         return readBuffered(amount);
     }
 
-    public function readLine(keepEnd:Bool = false):Bytes {
-        var checkedBuffer = false;
-        var index = 0;
-
-        while (true) {
-            var data;
-
-            if (checkedBuffer) {
-                data = readChunkIntoBuffer();
-            } else {
-                checkedBuffer = true;
-                data = pendingDataBuffer.peekRange();
-            }
-
-            if (isDataEndOnCarriageReturn(data)) {
-                data = readExtraByteToData(data);
-            }
-
-            var separatedData = separateAtNewline(data, index, keepEnd);
-
-            if (separatedData != null) {
-                return separatedData;
-            }
-
-            index += data.length;
-        }
-    }
-
     public function readUntil(separator:Int = "\n".code, keepEnd:Bool = false):Bytes {
         var checkedBuffer = false;
         var index = 0;
@@ -195,7 +167,7 @@ class StreamReader implements IInputStream {
         return new EndOfFile("", Exception.wrap(exception));
     }
 
-    function readChunkIntoBuffer(ignoreError:Bool = false):Bytes {
+    function readChunkIntoBuffer():Bytes {
         var currentChunkSize = getChunkSizeAvailable();
 
         if (currentChunkSize <= 0) {
@@ -232,39 +204,5 @@ class StreamReader implements IInputStream {
         }
 
         return null;
-    }
-
-    function isDataEndOnCarriageReturn(data:Bytes):Bool {
-        var index = data.charIndexOf("\r".code);
-        return index >=0 && index == data.length - 1;
-    }
-
-    function readExtraByteToData(data:Bytes):Bytes {
-        var extraData;
-        try {
-            extraData = readRaw(1);
-        } catch (exception:EndOfFile) {
-            return data;
-        }
-
-        pendingDataBuffer.pushRange(extraData);
-
-        var newData = Bytes.alloc(data.length + 1);
-        newData.blit(0, data, 0, data.length);
-        newData.set(newData.length - 1, extraData.get(0));
-        return newData;
-    }
-
-    function separateAtNewline(data:Bytes, position:Int, keepEnd:Bool):Null<Bytes> {
-        var separatedData = separateAtSeparator(data, "\n".code, position, keepEnd);
-
-        if (separatedData != null && !keepEnd
-                && separatedData.endsWith("\r".code)) {
-            return separatedData.sub(0, separatedData.length - 1);
-        } else if (separatedData != null) {
-            return separatedData;
-        }
-
-        return separateAtSeparator(data, "\r".code, position, keepEnd);
     }
 }

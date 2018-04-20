@@ -22,5 +22,15 @@ class IncompleteRead extends EndOfFile {
 }
 
 
+class IncompleteTextRead extends EndOfFile {
+    public var data:String;
+
+    public function new (message:String = '', previous:Exception = null, data:String) {
+        super(message, previous);
+        this.data = data;
+    }
+}
+
+
 class BufferFull extends StreamException {
 }

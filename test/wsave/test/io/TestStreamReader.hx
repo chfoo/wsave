@@ -47,49 +47,6 @@ class TestStreamReader {
         Assert.equals("Hello", readData.toString());
     }
 
-    public function testReadLine() {
-        var inputData = Bytes.ofString(
-            "Cat\nDog\r\nBird\rFish\n" +
-            "Cat\nDog\r\nBird\rFish\n");
-        var input = new BytesInput(inputData);
-        var streamReader = new StreamReader(input);
-        streamReader.chunkSize = 3;
-        var lines = [];
-
-        for (index in 0...8) {
-            lines.push(streamReader.readLine(index < 4));
-        }
-
-        Assert.equals("Cat\n", lines[0].toString());
-        Assert.equals("Dog\r\n", lines[1].toString());
-        Assert.equals("Bird\r", lines[2].toString());
-        Assert.equals("Fish\n", lines[3].toString());
-        Assert.equals("Cat", lines[4].toString());
-        Assert.equals("Dog", lines[5].toString());
-        Assert.equals("Bird", lines[6].toString());
-        Assert.equals("Fish", lines[7].toString());
-    }
-
-    public function testReadLineEndOfFile() {
-        var inputData = Bytes.ofString("Cat\n");
-        var input = new BytesInput(inputData);
-        var streamReader = new StreamReader(input);
-
-        streamReader.chunkSize = 3;
-        streamReader.readLine();
-        Assert.raises(function () { streamReader.readLine();}, EndOfFile);
-    }
-
-    public function testReadLineIncomplete() {
-        var inputData = Bytes.ofString("Cat\nSomething");
-        var input = new BytesInput(inputData);
-        var streamReader = new StreamReader(input);
-
-        streamReader.chunkSize = 3;
-        streamReader.readLine();
-        Assert.raises(function () { streamReader.readLine(); }, IncompleteRead);
-    }
-
     public function testReadUntil() {
         var inputData = Bytes.ofString("Cat\nDog\nHorse\nBird\n");
         var input = new BytesInput(inputData);
