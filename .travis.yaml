@@ -1,0 +1,10 @@
+language: haxe
+
+install:
+  - yes | haxelib install test-js.hxml
+  - yes | haxelib install test-neko.hxml
+
+script:
+  - haxe test-js.hxml
+  - haxe test-neko.hxml
+  - neko test.n
