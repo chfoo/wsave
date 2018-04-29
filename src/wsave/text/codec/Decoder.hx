@@ -85,7 +85,7 @@ class Decoder {
     function processError(result:Result):Null<Result> {
         switch (errorMode) {
             case ErrorMode.Replacement:
-                output.addChar(0xFFFD);
+                output.uAddChar(CodePoint.fromInt(0xFFFD));
             case ErrorMode.HTML:
                 var codePoint:Int = Type.enumParameters(result)[0];
                 input.prependString('&#${Std.string(codePoint)};');
