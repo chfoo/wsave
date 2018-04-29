@@ -2,6 +2,8 @@ package wsave;
 
 import haxe.macro.Expr;
 
+using haxe.macro.ExprTools;
+
 
 class Debug {
     macro static public function assert(condition:Expr, ?message:Expr) {
