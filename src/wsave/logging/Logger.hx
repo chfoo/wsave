@@ -29,16 +29,16 @@ class Logger {
     }
 
     public function log(level:Level, tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        var stack;
+            logStack:Bool = false, ?exception:Any, ?infos:PosInfos) {
+        var record = new Record(level, namespace, tag, args, infos);
 
         if (logStack) {
-            stack = CallStack.exceptionStack();
-        } else {
-            stack = null;
+            record.stack = CallStack.exceptionStack();
         }
 
-        var record = new Record(level, namespace, tag, args, stack, infos);
+        if (exception != null) {
+            record.exception = exception;
+        }
 
         for (handler in handlers) {
             handler.logRecord(record);
@@ -46,32 +46,37 @@ class Logger {
     }
 
     public function critical(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Critical, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Critical, tag, args, false, null, infos);
     }
 
     public function error(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Error, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Error, tag, args, false, null, infos);
     }
 
     public function warning(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Warning, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Warning, tag, args, false, null, infos);
     }
 
     public function info(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Info, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Info, tag, args, false, null, infos);
     }
 
     public function debug(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Debug, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Debug, tag, args, false, null, infos);
     }
 
     public function verbose(tag:String, ?args:Map<String,Dynamic>,
-            logStack:Bool = false, ?infos:PosInfos) {
-        log(Level.Verbose, tag, args, logStack, infos);
+            ?infos:PosInfos) {
+        log(Level.Verbose, tag, args, false, null, infos);
+    }
+
+    public function exception(level:Level, tag:String, exception:Any,
+            ?infos:PosInfos) {
+        log(level, tag, null, true, exception, infos);
     }
 }

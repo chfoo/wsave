@@ -35,6 +35,12 @@ class ConsoleHandler implements Handler {
             }
         }
 
+        if (record.exception != null) {
+            buffer.add("exception=");
+            buffer.add(Std.string(record.exception));
+            buffer.add(" ");
+        }
+
         if (record.stack != null) {
             buffer.add("\r\n");
             buffer.add(CallStack.toString(record.stack));

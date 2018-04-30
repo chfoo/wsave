@@ -10,6 +10,7 @@ class Record {
     public var tag:String;
     public var args:Map<String,Dynamic>;
     public var stack:Array<StackItem>;
+    public var exception:Any;
     public var position:PosInfos;
 
     public function new(level:Level, namespace:String, tag:String,
