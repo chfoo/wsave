@@ -7,11 +7,16 @@ import haxe.Json;
 
 class ConsoleHandler implements Handler {
     public var currentLine(default, null):String;
+    public var level:Level;
 
     public function new() {
     }
 
     public function logRecord(record:Record) {
+        if (record.level < this.level) {
+            return;
+        }
+
         var buffer = new StringBuf();
 
         buffer.add(record.level.toString());

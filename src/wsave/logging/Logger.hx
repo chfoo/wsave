@@ -5,8 +5,6 @@ import haxe.PosInfos;
 
 
 class Logger {
-    public var level:Level;
-
     var namespace:String;
     var handlers:Array<Handler>;
 
@@ -32,10 +30,6 @@ class Logger {
 
     public function log(level:Level, tag:String, ?args:Map<String,Dynamic>,
             logStack:Bool = false, ?infos:PosInfos) {
-        if (handlers.length == 0 || level < this.level) {
-            return;
-        }
-
         var stack;
 
         if (logStack) {
