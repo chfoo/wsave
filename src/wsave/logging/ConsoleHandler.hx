@@ -21,10 +21,6 @@ class ConsoleHandler implements Handler {
 
         buffer.add(record.level.toString());
         buffer.add(" ");
-        buffer.add(record.position.fileName);
-        buffer.add(":");
-        buffer.add(record.position.lineNumber);
-        buffer.add(" ");
         buffer.add(record.namespace);
         buffer.add(" ");
         buffer.add(record.tag);
