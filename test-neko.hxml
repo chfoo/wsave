@@ -1,11 +1,2 @@
--cp src/
--cp test/
+test.hxml
 -neko test.n
--lib exception
--lib utest
--lib unifill
--resource lib/encoding/encodings.json@encoding/encodings.json
--resource lib/encoding/indexes.json@encoding/indexes.json
--resource test/samples/UTF-8-test.txt@test/samples/UTF-8-test.txt
--debug
--main wsave.TestAll
