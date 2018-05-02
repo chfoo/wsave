@@ -2,6 +2,7 @@ language: haxe
 
 install:
   - yes | haxelib install test.hxml
+  - yes | haxelib install app.hxml
 
 script:
   - haxe test-js.hxml
