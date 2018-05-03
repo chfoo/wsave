@@ -1,12 +1,13 @@
 package wsaveapp;
 
-import wsaveapp.server.EchoServer;
-import tink.cli.Rest;
+import wsaveapp.server.EchoServerOptions;
+import wsaveapp.server.GopherFileServerOptions;
 
 
 class Options {
     public function new() {
         serveEcho = new EchoServerOptions();
+        serveGopher = new GopherFileServerOptions();
     }
 
     @:defaultCommand
@@ -16,25 +17,7 @@ class Options {
 
     @:command("serve-echo")
     public var serveEcho:EchoServerOptions;
-}
 
-
-class ServerOptions {
-    @:flag("--host")
-    public var host:String = "localhost";
-
-    @:flag("--port")
-    public var port:Int = 8010;
-
-    public function new() {
-    }
-}
-
-
-class EchoServerOptions extends ServerOptions {
-    @:defaultCommand
-    public function run(rest:Rest<String>) {
-        var server = new EchoServer(host, port);
-        server.run();
-    }
+    @:command("serve-gopher")
+    public var serveGopher:GopherFileServerOptions;
 }

@@ -30,7 +30,7 @@ class ProtocolReaderWriter {
     }
 
     public function readSelector():String {
-        return textReader.readLine(true);
+        return textReader.readLine(false);
     }
 
     public function writeSelector(selector:String) {
@@ -75,5 +75,9 @@ class ProtocolReaderWriter {
 
     public function writeBinaryFile(file:IInputStream):StreamIterator {
         return new StreamIterator(file, this.writer);
+    }
+
+    public function close() {
+        writer.close();
     }
 }
