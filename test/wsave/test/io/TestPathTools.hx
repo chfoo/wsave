@@ -43,37 +43,37 @@ class TestPathTools {
         Assert.equals(
             "/world/index.html",
             new Path("/hello/world/index.html")
-                .trimPath(new Path("/hello/"))
+                .trimPath(new Path("/hello/")).toString()
         );
 
         Assert.equals(
             "/index.html",
             new Path("/hello/world/index.html")
-                .trimPath(new Path("/hello/world/"))
+                .trimPath(new Path("/hello/world/")).toString()
         );
 
         Assert.equals(
             "index.html",
             new Path("hello/world/index.html")
-                .trimPath(new Path("hello/world/"))
+                .trimPath(new Path("hello/world/")).toString()
         );
 
         Assert.equals(
             "/hello/world/index.html",
             new Path("/hello/world/index.html")
-                .trimPath(new Path("/other/"))
+                .trimPath(new Path("/other/")).toString()
         );
 
         Assert.equals(
             "hello/world/index.html",
             new Path("hello/world/index.html")
-                .trimPath(new Path("other/"))
+                .trimPath(new Path("other/")).toString()
         );
 
         Assert.equals(
             "/hello/world/index.html",
             new Path("/hello/world/index.html")
-                .trimPath(new Path("/he/"))
+                .trimPath(new Path("/he/")).toString()
         );
     }
 }
