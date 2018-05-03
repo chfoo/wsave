@@ -5,7 +5,13 @@ import wsave.io.StreamReader;
 import wsave.io.StreamWriter;
 
 
-typedef StreamHandler = StreamReader->StreamWriter->Void;
+typedef StreamConnection = {
+    reader:StreamReader,
+    writer:StreamWriter,
+    socket:Socket
+};
+
+typedef StreamHandler = StreamConnection->Void;
 
 
 class StreamServer extends SocketServer {
@@ -17,9 +23,10 @@ class StreamServer extends SocketServer {
     }
 
     function socketHandler(socket:Socket) {
-        streamHandler(
-            new StreamReader(socket.input),
-            new StreamWriter(socket.output)
-        );
+        streamHandler({
+            reader: new StreamReader(socket.input),
+            writer: new StreamWriter(socket.output),
+            socket: socket
+        });
     }
 }
