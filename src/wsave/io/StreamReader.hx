@@ -3,7 +3,7 @@ package wsave.io;
 import haxe.io.Bytes;
 import haxe.io.Eof;
 import haxe.io.Input;
-import wsave.ds.BytesCircularBuffer;
+import wsave.ds.BytesDeque;
 import wsave.io.IOExceptions;
 
 using wsave.io.BytesTools;
@@ -14,11 +14,11 @@ class StreamReader implements IInputStream {
     public var maxBufferSize = 1048576;
 
     var input:Input;
-    var pendingDataBuffer:BytesCircularBuffer;
+    var pendingDataBuffer:BytesDeque;
 
     public function new(input:Input) {
         this.input = input;
-        pendingDataBuffer = new BytesCircularBuffer();
+        pendingDataBuffer = new BytesDeque();
     }
 
     public function read(amount:Int = -1, exact:Bool = false):Bytes {
@@ -57,7 +57,7 @@ class StreamReader implements IInputStream {
         Debug.assert(amount >= 0, amount);
 
         var buffer = Bytes.alloc(amount);
-        var bufferData = pendingDataBuffer.shiftRange(amount);
+        var bufferData = pendingDataBuffer.shiftBytes(amount);
 
         buffer.blit(0, bufferData, 0, bufferData.length);
 
@@ -76,28 +76,28 @@ class StreamReader implements IInputStream {
             try {
                 data = readRaw(chunkSize);
             } catch (exception:EndOfFile) {
-                if (pendingDataBuffer.logicalLength == 0) {
+                if (pendingDataBuffer.length == 0) {
                     throw exception;
                 } else {
                     break;
                 }
             }
 
-            pendingDataBuffer.pushRange(data);
+            pendingDataBuffer.pushBytes(data);
 
-            if (maxBufferSize > 0 && pendingDataBuffer.logicalLength > maxBufferSize) {
+            if (maxBufferSize > 0 && pendingDataBuffer.length > maxBufferSize) {
                 throw new BufferFull();
             }
         }
 
-        return pendingDataBuffer.shiftRange();
+        return pendingDataBuffer.shiftBytes();
     }
 
     function readExact(amount:Int):Bytes {
         Debug.assert(amount >= 0);
 
         var buffer = Bytes.alloc(amount);
-        var bufferData = pendingDataBuffer.shiftRange(amount);
+        var bufferData = pendingDataBuffer.shiftBytes(amount);
         buffer.blit(0, bufferData, 0, bufferData.length);
         var index = bufferData.length;
 
@@ -112,15 +112,15 @@ class StreamReader implements IInputStream {
                 if (index == 0) {
                     throw new EndOfFile();
                 } else {
-                    throw new IncompleteRead(pendingDataBuffer.shiftRange());
+                    throw new IncompleteRead(pendingDataBuffer.shiftBytes());
                 }
             }
 
-            pendingDataBuffer.pushRange(data);
+            pendingDataBuffer.pushBytes(data);
             index += data.length;
         }
 
-        return pendingDataBuffer.shiftRange();
+        return pendingDataBuffer.shiftBytes();
     }
 
     function readBestEffort(amount:Int):Bytes {
@@ -136,7 +136,7 @@ class StreamReader implements IInputStream {
             if (checkedBuffer) {
                 data = readChunkIntoBuffer();
             } else {
-                data = pendingDataBuffer.peekRange();
+                data = pendingDataBuffer.peekBytes();
                 checkedBuffer = true;
             }
 
@@ -152,7 +152,7 @@ class StreamReader implements IInputStream {
 
     function getChunkSizeAvailable():Int {
         if (maxBufferSize > 0) {
-            var spaceAvailable = maxBufferSize - pendingDataBuffer.logicalLength;
+            var spaceAvailable = maxBufferSize - pendingDataBuffer.length;
             var chunkSizeAvailable = Std.int(
                 Math.max(0, Math.min(spaceAvailable, chunkSize))
             );
@@ -179,14 +179,14 @@ class StreamReader implements IInputStream {
         try {
             data = readRaw(currentChunkSize);
         } catch (exception:EndOfFile) {
-            if (pendingDataBuffer.logicalLength > 0) {
-                throw new IncompleteRead(pendingDataBuffer.shiftRange());
+            if (pendingDataBuffer.length > 0) {
+                throw new IncompleteRead(pendingDataBuffer.shiftBytes());
             } else {
                 throw exception;
             }
         }
 
-        pendingDataBuffer.pushRange(data);
+        pendingDataBuffer.pushBytes(data);
         return data;
     }
 
@@ -194,7 +194,7 @@ class StreamReader implements IInputStream {
         var separatorIndex = data.charIndexOf(separator);
 
         if (separatorIndex >= 0) {
-            var targetData = pendingDataBuffer.shiftRange(position + separatorIndex + 1);
+            var targetData = pendingDataBuffer.shiftBytes(position + separatorIndex + 1);
 
             if (keepEnd) {
                 return targetData;
