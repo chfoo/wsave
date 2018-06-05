@@ -1,7 +1,8 @@
 package wsave.io;
 
+import commonbox.ds.Deque;
+import haxe.ds.Option;
 import wsave.Exception;
-import wsave.ds.CircularBuffer;
 
 using unifill.Unifill;
 
@@ -13,13 +14,13 @@ private typedef StringInfo = {
 
 
 class TextScanner {
-    var buffer:CircularBuffer<Int>;
+    var buffer:Deque<Int>;
     public var length(default, null) = 0;
     var carriageReturnIndex = -1;
     var newLineIndex = -1;
 
     public function new() {
-        buffer = new CircularBuffer();
+        buffer = new Deque();
     }
 
     public function pushString(text:String) {
@@ -33,15 +34,26 @@ class TextScanner {
 
     public function shiftString(?length:Int):String {
         var outputBuffer = new StringBuf();
-        var shiftedCodePoints = buffer.shiftRange(length);
 
-        for (codePoint in shiftedCodePoints) {
-            outputBuffer.uAddChar(codePoint);
+        if (length == null) {
+            length = buffer.length;
         }
 
-        carriageReturnIndex -= shiftedCodePoints.length;
-        newLineIndex -= shiftedCodePoints.length;
-        this.length -= shiftedCodePoints.length;
+        var numShifted = 0;
+
+        for (index in 0...length) {
+            switch (buffer.shift()) {
+                case Some(codePoint):
+                    outputBuffer.uAddChar(codePoint);
+                    numShifted += 1;
+                case None:
+                    break;
+            }
+        }
+
+        carriageReturnIndex -= numShifted;
+        newLineIndex -= numShifted;
+        this.length -= numShifted;
 
         Debug.assert(this.length >= 0, this.length);
         scanNewlines();
@@ -50,15 +62,12 @@ class TextScanner {
     }
 
     public function indexOf(codePoint:Int):Int {
-        var peekedCodePoints = buffer.peekRange();
-
-        for (index in 0...peekedCodePoints.length) {
-            if (codePoint == peekedCodePoints.get(index)) {
+        switch (buffer.indexOf(codePoint)) {
+            case Some(index):
                 return index;
-            }
+            case None:
+                return -1;
         }
-
-        return -1;
     }
 
     function scanNewlines() {
