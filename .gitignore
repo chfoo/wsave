@@ -1,6 +1,2 @@
 # Output files
-out/app/
-app.n
-test.js
-test.js.map
-test.n
+out/

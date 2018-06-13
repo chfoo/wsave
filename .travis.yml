@@ -5,7 +5,7 @@ install:
   - yes | haxelib install app.hxml
 
 script:
-  - haxe test-js.hxml
-  - haxe test-neko.hxml
-  - neko test.n
-  - haxe app-neko.hxml
+  - haxe hxml/test.js.hxml
+  - haxe hxml/test-neko.hxml
+  - neko out/neko/test.n
+  - haxe hxml/app.neko.hxml
