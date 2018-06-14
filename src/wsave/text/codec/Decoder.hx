@@ -4,6 +4,7 @@ import haxe.io.Bytes;
 import unifill.CodePoint;
 import wsave.text.TextExceptions;
 
+using commonbox.utils.OptionTools;
 using unifill.Unifill;
 
 
@@ -29,7 +30,7 @@ class Decoder {
             var byte;
 
             if (input.length > 0) {
-                byte = input.pop();
+                byte = input.shift().getSome();
             } else if (dataIndex < data.length) {
                 byte = data.get(dataIndex);
                 dataIndex += 1;

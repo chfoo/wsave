@@ -4,6 +4,7 @@ import haxe.io.BytesBuffer;
 import haxe.io.Bytes;
 import wsave.text.TextExceptions;
 
+using commonbox.utils.OptionTools;
 using unifill.Unifill;
 
 
@@ -29,7 +30,7 @@ class Encoder {
             var codePoint;
 
             if (input.length > 0) {
-                codePoint = input.pop();
+                codePoint = input.shift().getSome();
             } else if (codePointIterator.hasNext()) {
                 codePoint = codePointIterator.next();
             } else {

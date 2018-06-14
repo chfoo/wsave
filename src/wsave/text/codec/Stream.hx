@@ -1,9 +1,11 @@
 package wsave.text.codec;
 
+import commonbox.ds.Deque;
+
 using unifill.Unifill;
 
 
-class Stream extends List<Int> {
+class Stream extends Deque<Int> {
     public static inline var END_OF_STREAM = -1;
 
     public function prependString(text:String) {
@@ -16,7 +18,7 @@ class Stream extends List<Int> {
         codePoints.reverse();
 
         for (codePoint in codePoints) {
-            push(codePoint);
+            unshift(codePoint);
         }
     }
 }

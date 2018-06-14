@@ -24,7 +24,7 @@ class UTF8Decoder implements Handler {
             codePoint = bytesNeeded = bytesSeen = 0;
             lowerBoundary = 0x80;
             upperBoundary = 0xbf;
-            stream.push(byte);
+            stream.unshift(byte);
 
             return Result.Error(CodecTools.INT_NULL);
         }
