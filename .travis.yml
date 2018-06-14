@@ -6,6 +6,6 @@ install:
 
 script:
   - haxe hxml/test.js.hxml
-  - haxe hxml/test-neko.hxml
+  - haxe hxml/test.neko.hxml
   - neko out/neko/test.n
   - haxe hxml/app.neko.hxml
