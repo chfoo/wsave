@@ -34,7 +34,7 @@ class Registry {
             case "Legacy single-byte encodings":
                 return new SingleByteEncoder(name.toLowerCase());
             case "Legacy multi-byte Chinese (simplified) encodings":
-                throw new NotImplementedException();
+                return new GB18030Encoder(name == "GBK");
             case "Legacy multi-byte Chinese (traditional) encodings":
                 throw new NotImplementedException();
             case "Legacy multi-byte Japanese encodings":
@@ -67,7 +67,7 @@ class Registry {
             case "Legacy single-byte encodings":
                 return new SingleByteDecoder(name.toLowerCase());
             case "Legacy multi-byte Chinese (simplified) encodings":
-                throw new NotImplementedException();
+                return new GB18030Decoder();
             case "Legacy multi-byte Chinese (traditional) encodings":
                 throw new NotImplementedException();
             case "Legacy multi-byte Japanese encodings":

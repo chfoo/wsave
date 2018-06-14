@@ -2,6 +2,8 @@ package wsave.test.text.codecs;
 
 import utest.Assert;
 import wsave.Exception;
+import wsave.text.codec.GB18030Decoder;
+import wsave.text.codec.GB18030Encoder;
 import wsave.text.codec.Registry;
 import wsave.text.codec.SingleByteDecoder;
 import wsave.text.codec.SingleByteEncoder;
@@ -29,7 +31,7 @@ class TestRegistry {
     public function testGetEncoderHandler() {
         Assert.is(Registry.getEncoderHandler("utf8"), UTF8Encoder);
         Assert.is(Registry.getEncoderHandler("latin2"), SingleByteEncoder);
-        // Assert.is(Registry.getEncoderHandler("gbk"), Todo);
+        Assert.is(Registry.getEncoderHandler("gbk"), GB18030Encoder);
         // Assert.is(Registry.getEncoderHandler("big5"), Todo);
         // Assert.is(Registry.getEncoderHandler("shift_jis"), Todo);
         // Assert.is(Registry.getEncoderHandler("euc-kr"), Todo);
@@ -51,7 +53,7 @@ class TestRegistry {
     public function testGetDecoderHandler() {
         Assert.is(Registry.getDecoderHandler("utf8"), UTF8Decoder);
         Assert.is(Registry.getDecoderHandler("latin2"), SingleByteDecoder);
-        // Assert.is(Registry.getDecoderHandler("gbk"), Todo);
+        Assert.is(Registry.getDecoderHandler("gbk"), GB18030Decoder);
         // Assert.is(Registry.getDecoderHandler("big5"), Todo);
         // Assert.is(Registry.getDecoderHandler("shift_jis"), Todo);
         // Assert.is(Registry.getDecoderHandler("euc-kr"), Todo);

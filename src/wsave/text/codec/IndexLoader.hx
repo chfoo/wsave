@@ -5,6 +5,12 @@ import haxe.Resource;
 import haxe.Json;
 
 
+typedef GB18030Range = {
+    pointer:Int,
+    codePoint:Int
+};
+
+
 class IndexLoader {
     static function loadJson():Any {
         var text = Resource.getString("encoding/indexes.json");
@@ -53,5 +59,20 @@ class IndexLoader {
         }
 
         return map;
+    }
+
+    public static function getGB18030Ranges():Array<GB18030Range> {
+        var array:Array<Array<Int>> = cast getArray("gb18030-ranges");
+
+        var newArray = [];
+
+        for (item in array) {
+            newArray.push({
+                pointer: item[0],
+                codePoint: item[1]
+            });
+        }
+
+        return newArray;
     }
 }
