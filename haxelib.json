@@ -1,0 +1,18 @@
+{
+  "name": "wsave",
+  "url" : "https://github.com/chfoo/wsave/",
+  "license": "GPL",
+  "tags": ["cross"],
+  "description": "Wsave is (will be) a web crawler and web data format processing program.",
+  "version": "0.1.0",
+  "classPath": "src/",
+  "contributors": ["chfoo"],
+  "releasenote": "Initial release",
+  "dependencies": {
+    "callnest": "",
+    "commonbox": "",
+    "exception": "1.0.2",
+    "plumekit": "",
+    "unifill": "0.4.1"
+  }
+}
