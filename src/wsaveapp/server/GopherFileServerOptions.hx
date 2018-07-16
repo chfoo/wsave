@@ -4,7 +4,11 @@ import tink.cli.Rest;
 
 
 class GopherFileServerOptions {
+    @:flag("--help")
+    public var help:Bool;
+
     @:flag("--host")
+    @:alias("s")
     public var host:String = "localhost";
 
     @:flag("--port")
@@ -19,7 +23,13 @@ class GopherFileServerOptions {
 
     @:defaultCommand
     public function run(rest:Rest<String>) {
-        var server = new GopherFileServer(host, port, path);
-        server.run();
+        if (help) {
+            ArgParserTools.showHelp(this);
+            return;
+        }
+
+        var server = new GopherFileServer(path);
+        var serverTask = server.start(host, port);
+        Runner.run(serverTask);
     }
 }

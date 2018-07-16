@@ -1,129 +1,128 @@
 package wsaveapp.server;
 
+import callnest.Task;
+import callnest.VoidReturn;
+import haxe.ds.Option;
+import plumekit.eventloop.EventLoop;
+import plumekit.net.Connection;
+import plumekit.net.ConnectionAddress;
+import plumekit.stream.InputStream;
+import plumekit.www.gopher.DirectoryEntity;
+import plumekit.www.gopher.ItemType;
+import plumekit.www.gopher.Server;
+import plumekit.www.gopher.ServerSession;
 import sys.FileSystem;
 import sys.io.File;
-import wsave.internet.gopher.DirectoryEntity;
-import wsave.internet.gopher.ItemType;
-import wsave.internet.gopher.ProtocolReaderWriter;
-import wsave.io.StreamReader;
 import wsave.logging.Level;
 import wsave.logging.Logging;
-import wsave.sys.net.StreamServer;
 import wsave.sys.PathSandbox;
 
-
-private typedef LocalAddress = {
-    host:String, port:Int
-};
+using callnest.TaskTools;
 
 
-class GopherFileServer extends StreamServer {
+class GopherFileServer extends Server {
     static var logger = Logging.getLogger(Type.getClassName(GopherFileServer));
 
     var pathSandbox:PathSandbox;
-    var localAddress:LocalAddress;
 
-    public function new(host:String, port:Int = 70, rootPath:String) {
-        super(host, port, gopherHandler);
+    public function new(rootPath:String, ?eventLoop:EventLoop) {
+        super(eventLoop);
 
         pathSandbox = new PathSandbox(rootPath);
-        localAddress = { host: host, port: port };
 
-        logger.info("bind", [ "host" => host, "port" => port,
-            "path" => pathSandbox.rootPath.toString() ]);
+        logger.info("init", [ "path" => pathSandbox.rootPath.toString() ]);
     }
 
-    function gopherHandler(connection:StreamConnection) {
-        var session = new GopherFileSession(connection, pathSandbox,
-            localAddress);
-        session.process();
+    override function newSession(connection:Connection):ServerSession {
+        return new GopherFileSession(connection, pathSandbox);
     }
 }
 
 
-class GopherFileSession {
+class GopherFileSession extends ServerSession {
     static var logger = Logging.getLogger(Type.getClassName(GopherFileSession));
 
-    var protocol:ProtocolReaderWriter;
     var pathSandbox:PathSandbox;
-    var localAddress:LocalAddress;
+    var localAddress:ConnectionAddress;
 
-    public function new(connection:StreamConnection, pathSandbox:PathSandbox,
-            localAddress:LocalAddress) {
-        this.protocol = new ProtocolReaderWriter(
-            connection.reader, connection.writer);
+    public function new(connection:Connection, pathSandbox:PathSandbox) {
+        super(connection);
         this.pathSandbox = pathSandbox;
-        this.localAddress = localAddress;
+        this.localAddress = connection.hostAddress();
 
-        var peerInfo = connection.socket.peer();
+        var peerInfo = connection.peerAddress();
         logger.debug("accept",
-            [ "host" => peerInfo.host.ip, "port" => peerInfo.port]);
+            [ "host" => peerInfo.hostname, "port" => peerInfo.port]);
     }
 
-    public function process() {
-        try {
-            serve();
-        } catch (exception:Dynamic) {
-            logger.exception(Level.Error, "serve_error", exception);
-        }
-
-        protocol.close();
+    public override function process():Task<VoidReturn> {
+        return protocol.readSelector().continueWith(readSelectorCallback);
     }
 
-    function serve() {
-        var selector = protocol.readSelector();
+    function readSelectorCallback(task:Task<String>):Task<VoidReturn> {
+        var selector = task.getResult();
+
         logger.debug("selector", [ "selector" => selector ]);
 
         var fileInfo = pathSandbox.getFile(selector);
 
         if (fileInfo != null) {
-            writeFile(fileInfo);
-
-            return;
+            return writeFile(fileInfo);
         }
 
         var dirListing = pathSandbox.getDirectoryListing(selector);
 
         if (dirListing != null) {
-            writeMenu(dirListing);
+            return writeMenu(dirListing);
         }
+
+        return TaskTools.fromResult(Nothing);
     }
 
-    function writeFile(fileInfo:UserPathInfo) {
+    function writeFile(fileInfo:UserPathInfo):Task<VoidReturn> {
         var path = fileInfo.systemPath.toString();
 
         logger.debug("serve_file", [ "path" => path ]);
 
         var file = File.read(path);
+        var source = new InputStream(file);
 
-        try {
-            for (chunk in protocol.writeBinaryFile(new StreamReader(file))) {
-            }
-        } catch (exception:Dynamic) {
-            file.close();
-            throw exception;
-        }
+        return protocol.putFile(source).transferAll().thenResult(Nothing);
     }
 
-    function writeMenu(dirListing:Array<UserPathInfo>) {
-        for (info in dirListing) {
-            var type;
+    function writeMenu(dirListing:Array<UserPathInfo>):Task<VoidReturn> {
+        return writeMenuIteration(dirListing, 0);
+    }
 
-            if (FileSystem.isDirectory(info.systemPath.toString())) {
-                type = ItemType.Menu;
-            } else {
-                type = ItemType.BinaryFile;
-            }
+    function writeMenuIteration(dirListing:Array<UserPathInfo>, index:Int):Task<VoidReturn> {
+        var info = dirListing[index];
+        var type;
 
-            var entity = new DirectoryEntity(
-                type,
-                info.userPath,
-                info.userPath,
-                localAddress.host,
-                localAddress.port
-            );
-
-            protocol.writeDirectoryEntity(entity);
+        if (FileSystem.isDirectory(info.systemPath.toString())) {
+            type = ItemType.Menu;
+        } else {
+            type = ItemType.BinaryFile;
         }
+
+        var entity = new DirectoryEntity(
+            type,
+            info.userPath,
+            info.userPath,
+            localAddress.hostname,
+            localAddress.port
+        );
+
+        return protocol.writeDirectoryEntity(entity)
+            .continueWith(function (task) {
+                task.getResult();
+
+                index += 1;
+
+                if (index >= dirListing.length) {
+                    return TaskTools.fromResult(Nothing);
+                } else {
+                    return writeMenuIteration(dirListing, index);
+                }
+            });
     }
 }

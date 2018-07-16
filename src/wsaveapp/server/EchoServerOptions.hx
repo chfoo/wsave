@@ -4,7 +4,11 @@ import tink.cli.Rest;
 
 
 class EchoServerOptions {
+    @:flag("--help")
+    public var help:Bool;
+
     @:flag("--host")
+    @:alias("s")
     public var host:String = "localhost";
 
     @:flag("--port")
@@ -15,7 +19,13 @@ class EchoServerOptions {
 
     @:defaultCommand
     public function run(rest:Rest<String>) {
-        var server = new EchoServer(host, port);
-        server.run();
+        if (help) {
+            ArgParserTools.showHelp(this);
+            return;
+        }
+
+        var server = new EchoServer();
+        var serverTask = server.start(host, port);
+        Runner.run(serverTask);
     }
 }

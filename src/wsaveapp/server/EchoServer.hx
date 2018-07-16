@@ -1,26 +1,30 @@
 package wsaveapp.server;
 
-import haxe.io.Error;
-import wsave.io.IOExceptions;
-import wsave.io.StreamReader;
-import wsave.io.StreamWriter;
+import callnest.VoidReturn;
+import callnest.Task;
+import callnest.TaskTools;
+import haxe.ds.Option;
+import haxe.io.Bytes;
+import plumekit.eventloop.ConnectionServer;
+import plumekit.net.Connection;
+import plumekit.stream.StreamException.EndOfFileException;
+import plumekit.stream.StreamReader;
+import plumekit.stream.StreamWriter;
 import wsave.logging.Level;
 import wsave.logging.Logging;
-import wsave.sys.net.StreamServer;
 
 
-class EchoServer extends StreamServer {
+class EchoServer extends ConnectionServer {
     static var logger = Logging.getLogger(Type.getClassName(EchoServer));
 
-    public function new(host:String, port:Int) {
-        super(host, port, echoHandler);
-
-        logger.info("bind", [ "host" => host, "port" => port ]);
+    public function new() {
+        super(echoHandler);
+        //logger.info("bind", [ "host" => host, "port" => port ]);
     }
 
-    function echoHandler(connection:StreamConnection) {
+    function echoHandler(connection:Connection):Task<VoidReturn> {
         var session = new EchoSession(connection);
-        session.process();
+        return session.process();
     }
 }
 
@@ -31,54 +35,42 @@ class EchoSession {
     var reader:StreamReader;
     var writer:StreamWriter;
 
-    public function new(connection:StreamConnection) {
-        this.reader = connection.reader;
-        this.writer = connection.writer;
+    public function new(connection:Connection) {
+        this.reader = new StreamReader(connection.source);
+        this.writer = new StreamWriter(connection.sink);
 
-        var peerInfo = connection.socket.peer();
+        var peerInfo = connection.peerAddress();
         logger.debug("accept",
-            [ "host" => peerInfo.host.ip, "port" => peerInfo.port]);
+            [ "host" => peerInfo.hostname, "port" => peerInfo.port]);
     }
 
-    public function process() {
-        while (true) {
-            var success;
-            try {
-                success = processLine();
-            } catch (exception:Dynamic) {
-                logger.exception(Level.Error, "line_error", exception);
-                throw exception;
-            }
-
-            if (!success) {
-                break;
-            }
-        }
-
-        logger.debug("close");
-        writer.close();
+    public function process():Task<VoidReturn> {
+        return readIteration();
     }
 
-    function processLine():Bool {
-        var line;
+    function readIteration():Task<VoidReturn> {
+        logger.debug("read_line");
 
+        return reader.readOnce().continueWith(readIterationCallback);
+    }
+
+    function readIterationCallback(task:Task<Option<Bytes>>):Task<VoidReturn> {
+        switch (task.getResult()) {
+            case Some(bytes):
+                logger.verbose("line", [ "line" => bytes ]);
+                return writer.write(bytes).continueWith(writeCallback);
+            case None:
+                return TaskTools.fromResult(Nothing);
+        }
+    }
+
+    function writeCallback(task:Task<Int>):Task<VoidReturn> {
         try {
-            logger.debug("read_line");
-            line = reader.readUntil(true);
-        } catch (exception:EndOfFile) {
-            return false;
+            task.getResult();
+        } catch (exception:EndOfFileException) {
+            return TaskTools.fromResult(Nothing);
         }
 
-        logger.verbose("line", [ "line" => line ]);
-
-        try {
-            writer.write(line);
-            writer.flush();
-        } catch (exception:Error) {
-            logger.exception(Level.Debug, "write_error", exception);
-            return false;
-        }
-
-        return true;
+        return readIteration();
     }
 }

@@ -1,5 +1,6 @@
 package wsaveapp;
 
+import tink.core.Error;
 import wsaveapp.server.EchoServerOptions;
 import wsaveapp.server.GopherFileServerOptions;
 
@@ -12,7 +13,7 @@ class Options {
 
     @:defaultCommand
     public function run() {
-
+        ArgParserTools.showHelp(this);
     }
 
     @:command("serve-echo")
@@ -20,4 +21,14 @@ class Options {
 
     @:command("serve-gopher")
     public var serveGopher:GopherFileServerOptions;
+}
+
+
+class ShowHelp extends Error {
+    public var command(default, null):Dynamic;
+
+    public function new(command:Dynamic) {
+        this.command = command;
+        super("shouldn't see this");
+    }
 }

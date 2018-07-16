@@ -1,11 +1,4 @@
 -cp src/
 -cp test/
--lib commonbox
--lib exception
--lib tink_cli
--lib utest
--lib unifill
--resource lib/encoding/encodings.json@encoding/encodings.json
--resource lib/encoding/indexes.json@encoding/indexes.json
--debug
+libs.hxml
 -main wsaveapp.Main
