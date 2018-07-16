@@ -5,6 +5,11 @@ install:
   - yes | haxelib install app.hxml
   - yes | haxelib install hxml/test.cpp.hxml
 
+    ## Comment or remove once stable API is reached:
+  - yes | haxelib git callnest https://github.com/chfoo/callnest
+  - yes | haxelib git plumekit https://github.com/chfoo/plumekit
+
+
 script:
   # Build and run unit tests
   - haxe hxml/test.neko.hxml
