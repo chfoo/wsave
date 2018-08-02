@@ -26,6 +26,6 @@ class EchoServerOptions {
 
         var server = new EchoServer();
         var serverTask = server.start(host, port);
-        Runner.run(serverTask);
+        Runner.runAsync(serverTask);
     }
 }

@@ -1,8 +1,5 @@
 package wsaveapp;
 
-import haxe.CallStack;
-import callnest.TaskDefaults;
-import plumekit.Exception;
 import tink.core.Noise;
 import tink.core.Outcome;
 import tink.core.Error;
@@ -24,13 +21,19 @@ class Main {
 
     static function optionHandler(result:Outcome<Noise, Error>) {
         // Don't exit because the commands are asynchronous.
-        // Can't make use of Error to show help because it uses macros
-        // and can't pass an instance.
         switch (result) {
             case Success(_):
                 // empty
             case Failure(error):
-                ArgParserTools.exitParserError(error.message);
+                var message = "Error parsing arguments.";
+
+                // Nice error message :P
+                // TODO: better help
+                if (error.message != "Unexpected Error") {
+                    message += error.message;
+                }
+
+                ArgParserTools.exitParserError(message);
         }
     }
 }

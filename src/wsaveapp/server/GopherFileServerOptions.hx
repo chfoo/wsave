@@ -30,6 +30,6 @@ class GopherFileServerOptions {
 
         var server = new GopherFileServer(path);
         var serverTask = server.start(host, port);
-        Runner.run(serverTask);
+        Runner.runAsync(serverTask);
     }
 }

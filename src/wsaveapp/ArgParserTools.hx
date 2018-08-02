@@ -1,17 +1,20 @@
 package wsaveapp;
 
-import tink.Cli;
+import haxe.macro.Expr;
 
 
 class ArgParserTools {
-    public static function showHelp<T>(command:T) {
-        // TODO: this doesn't work
-        var doc = Cli.getDoc(command);
-        Sys.stderr().writeString(doc);
+    public static macro function showHelp(command:Expr):Expr {
+        return macro {
+            var doc = tink.Cli.getDoc($command);
+            Sys.stderr().writeString(doc);
+        };
     }
 
     public static function exitParserError(errorMessage:String) {
         Sys.stderr().writeString(errorMessage);
+        Sys.stderr().writeString("\n");
+        Sys.stderr().writeString("Try the \"--help\" switch for more information.\n");
         Sys.exit(2);
     }
 }

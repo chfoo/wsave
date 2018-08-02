@@ -1,2 +1,3 @@
 test.hxml
+-D embed-resources
 -js out/js/test.js
